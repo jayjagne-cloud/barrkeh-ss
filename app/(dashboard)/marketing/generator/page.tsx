@@ -25,15 +25,21 @@ import {
   Bot,
   Loader2,
   Wand2,
+  Megaphone,
+  Send,
+  Gauge,
 } from "lucide-react"
 
 const contentTypes = [
+  { value: "campaign", label: "Campaign Kit", icon: Megaphone, description: "Multi-channel plan with assets" },
   { value: "hooks", label: "Hooks", icon: MessageSquare, description: "10 attention-grabbing hooks" },
   { value: "captions", label: "Captions", icon: FileText, description: "Short, medium, and long versions" },
   { value: "ctas", label: "CTAs", icon: Type, description: "Call-to-action phrases" },
   { value: "hashtags", label: "Hashtags", icon: Hash, description: "Platform-optimized hashtags" },
   { value: "carousel", label: "Carousel", icon: Layers, description: "Slide-by-slide outline" },
   { value: "reel", label: "Reel Script", icon: Film, description: "Script + shot list" },
+  { value: "ads", label: "Paid Ads", icon: Gauge, description: "Ad angles, copy, and targeting" },
+  { value: "email", label: "Email", icon: Send, description: "High-converting email draft" },
 ]
 
 const goalOptions = [
@@ -60,11 +66,14 @@ const toneOptions = [
 
 export default function ContentGeneratorPage() {
   const [productName, setProductName] = useState("")
-  const [selectedType, setSelectedType] = useState("hooks")
+  const [selectedType, setSelectedType] = useState("campaign")
   const [goal, setGoal] = useState("launch")
   const [platform, setPlatform] = useState("instagram")
   const [tone, setTone] = useState("bold-premium")
   const [customDetails, setCustomDetails] = useState("")
+  const [audience, setAudience] = useState("")
+  const [offer, setOffer] = useState("")
+  const [keywords, setKeywords] = useState("")
   const [copiedIndex, setCopiedIndex] = useState<string | null>(null)
 
   const { messages, sendMessage, status, setMessages } = useChat({
@@ -78,15 +87,17 @@ export default function ContentGeneratorPage() {
 
     setMessages([])
 
-    const contextPrompt = `Generate ${contentTypes.find((t) => t.value === selectedType)?.label} for:
-
+    const contextPrompt = `Build a state-of-the-art ${contentTypes.find((t) => t.value === selectedType)?.label} for:
 Product: ${productName}
 Goal: ${goalOptions.find((g) => g.value === goal)?.label}
-Platform: ${platformOptions.find((p) => p.value === platform)?.label}
-Tone: ${toneOptions.find((t) => t.value === tone)?.label}
-${customDetails ? `Additional Details: ${customDetails}` : ""}
+Primary Platform: ${platformOptions.find((p) => p.value === platform)?.label}
+Tone / Voice: ${toneOptions.find((t) => t.value === tone)?.label}
+Audience: ${audience || "Not provided"}
+Offer/Proof: ${offer || "Not provided"}
+Keywords / angles to emphasize: ${keywords || "Not provided"}
+Additional context: ${customDetails || "None"}
 
-Please generate high-quality, platform-optimized content that matches the tone and goal specified.`
+Output must be concise, skimmable, and formatted with clear headings and bullet points. Where relevant, include platform-specific tweaks, conversion psychology, and fresh angles that feel modern (no cliché marketing fluff).`
 
     sendMessage({ text: contextPrompt })
   }
@@ -122,7 +133,7 @@ Please generate high-quality, platform-optimized content that matches the tone a
           </Badge>
         </h1>
         <p className="text-muted-foreground mt-1">
-          Generate hooks, captions, CTAs, hashtags, carousel outlines, and reel scripts with AI.
+          Generate campaign kits, hooks, captions, ads, emails, hashtags, carousel outlines, and reel scripts with AI.
         </p>
       </div>
 
@@ -158,7 +169,7 @@ Please generate high-quality, platform-optimized content that matches the tone a
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Wand2 className="h-5 w-5 text-primary" />
-              Settings
+              Strategy Inputs
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -168,6 +179,16 @@ Please generate high-quality, platform-optimized content that matches the tone a
                 value={productName}
                 onChange={(e) => setProductName(e.target.value)}
                 placeholder="e.g., Ramadan Planner"
+                className="bg-secondary"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Target Audience</Label>
+              <Input
+                value={audience}
+                onChange={(e) => setAudience(e.target.value)}
+                placeholder="e.g., busy Muslim moms, 25-40, US/UK"
                 className="bg-secondary"
               />
             </div>
@@ -205,6 +226,16 @@ Please generate high-quality, platform-optimized content that matches the tone a
             </div>
 
             <div className="space-y-2">
+              <Label>Offer / Proof</Label>
+              <Input
+                value={offer}
+                onChange={(e) => setOffer(e.target.value)}
+                placeholder="e.g., 20% launch promo, 1,200 customers, 4.8★ reviews"
+                className="bg-secondary"
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label>Tone</Label>
               <Select value={tone} onValueChange={setTone}>
                 <SelectTrigger>
@@ -218,6 +249,16 @@ Please generate high-quality, platform-optimized content that matches the tone a
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Keywords / Non‑negotiables</Label>
+              <Input
+                value={keywords}
+                onChange={(e) => setKeywords(e.target.value)}
+                placeholder="e.g., faith-forward, minimal aesthetic, time-saving"
+                className="bg-secondary"
+              />
             </div>
 
             <div className="space-y-2">
@@ -275,6 +316,19 @@ Please generate high-quality, platform-optimized content that matches the tone a
             </CardTitle>
           </CardHeader>
           <CardContent>
+            <div className="mb-4 grid gap-2 sm:grid-cols-2 text-sm text-muted-foreground">
+              <div>
+                <p className="font-medium text-foreground">{productName || "No product set"}</p>
+                <p>
+                  Goal: {goalOptions.find((g) => g.value === goal)?.label} • Platform:{" "}
+                  {platformOptions.find((p) => p.value === platform)?.label}
+                </p>
+              </div>
+              <div className="text-right sm:text-left">
+                <p>Audience: {audience || "—"}</p>
+                <p>Offer: {offer || "—"}</p>
+              </div>
+            </div>
             <ScrollArea className="h-[500px]">
               {generatedContent ? (
                 <div className="space-y-4">
@@ -315,7 +369,8 @@ Please generate high-quality, platform-optimized content that matches the tone a
               <div>
                 <p className="font-medium text-foreground">Be Specific</p>
                 <p className="text-sm text-muted-foreground">
-                  The more details you provide, the better the AI can tailor content to your needs.
+                  The more details you provide, the better the AI can tailor content to your needs. Include audience, offer,
+                  proof, and angles.
                 </p>
               </div>
             </div>
